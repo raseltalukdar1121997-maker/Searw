@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Maps Location Share</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #eef5f0;
+  padding: 20px;
+}
+
+.card {
+  max-width: 430px;
+  margin: 25px auto;
+  padding: 22px;
+  border-radius: 16px;
+  background: white;
+  text-align: center;
+  box-shadow: 0 4px 18px #0001;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 7px 0;
+  border: none;
+  border-radius: 9px;
+  background: #168653;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.stop {
+  background: #c93636;
+}
+
+#status,
+#map {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+
+  <h2>📍 Live </h2>
+  <p>শেয়ার করুন</p>
+
+  <button onclick="startLocation()">
+   চালু করুন
+  </button>
+
+  <button onclick="shareLocation()">
+    WhatsApp-এ  লিংক পাঠান
+  </button>
+
+  <button onclick="openMap()">
+    খুলুন
+  </button>
+  
+   <!-- লোকেশনের লেখা লুকানো -->
+  <div id="status"></div>
+  <p id="map"></p>
+
+</div>
+
+<script>
+let watchId = null;
+let currentUrl = "";
+
+function startLocation() {
+  if (!navigator.geolocation) {
+    alert("আপনার ব্রাউজারে সুবিধা নেই।");
+    return;
+  }
+
+  if (watchId !== null) return;
+
+  watchId = navigator.geolocation.watchPosition(
+    function(pos) {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+
+      currentUrl =
+        "https://www.google.com/maps?q=" +
+        lat + "," + lon;
+    },
+    function(err) {
+      watchId = null;
+      alert(
+        " পাওয়া যায়নি। ব্রাউজারের অনুমতি পরীক্ষা করুন।"
+      );
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 3000,
+      timeout: 20000
+    }
+  );
+}
+
+function shareLocation() {
+  if (!currentUrl) {
+    alert("আগে লোকেশন চালু করুন এবং অনুমতি দিন।");
+    return;
+  }
+
+  const text =
+    "আমার সর্বশেষ লোকেশন দেখুন: " + currentUrl;
+
+  window.open(
+    "https://wa.me/?text=" +
+    encodeURIComponent(text),
+    "_blank"
+  );
+}
+
+function openMap() {
+  if (!currentUrl) {
+    alert("আগে লোকেশন চালু করুন।");
+    return;
+  }
+
+  window.open(currentUrl, "_blank", "noopener");
+}
+
+function stopLocation() {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+
+  currentUrl = "";
+  alert("লোকেশন আপডেট বন্ধ করা হয়েছে।");
+}
+</script>
+</body>
+</html>
